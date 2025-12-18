@@ -71,7 +71,7 @@ export default async function ({ user, weight = 1.0 }) {
       responseFormats: ['## Response', 'response format', 'response formats', email, studentId],
       rateLimits: ['## Rate', 'limit', 'usage', 'policy', 'policies'],
       contact: ['## Contact', email],
-      lastUpdated: ['last updated', 'date', '202']
+      lastUpdated: ['last updated', 'date']
     };
 
     const errors = [];
@@ -113,9 +113,19 @@ export default async function ({ user, weight = 1.0 }) {
       errors.push(`Missing Contact section with email: ${email}`);
     }
 
-    // Check last updated date
-    if (!required.lastUpdated.some(keyword => submittedText.toLowerCase().includes(keyword.toLowerCase()))) {
-      errors.push('Missing Last Updated date');
+    // Check last updated date - look for "last updated" or "date" keywords and common date patterns
+    const hasDateKeyword = required.lastUpdated.some(keyword => submittedText.toLowerCase().includes(keyword.toLowerCase()));
+    // Check for common date formats: YYYY-MM-DD, YYYY/MM/DD, Month DD, YYYY, DD Month YYYY, etc.
+    const datePatterns = [
+      /\b\d{4}[-/]\d{1,2}[-/]\d{1,2}\b/,  // YYYY-MM-DD or YYYY/MM/DD
+      /\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{1,2},? \d{4}\b/i,  // Month DD, YYYY
+      /\b\d{1,2} (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{4}\b/i,  // DD Month YYYY
+      /\b\d{4}\b/  // Just a year (YYYY)
+    ];
+    const hasDateFormat = datePatterns.some(pattern => pattern.test(submittedText));
+    
+    if (!hasDateKeyword || !hasDateFormat) {
+      errors.push('Missing Last Updated date with a valid date format');
     }
 
     if (errors.length > 0) {
