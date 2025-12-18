@@ -115,12 +115,12 @@ export default async function ({ user, weight = 1.0 }) {
 
     // Check last updated date - look for "last updated" or "date" keywords and common date patterns
     const hasDateKeyword = required.lastUpdated.some(keyword => submittedText.toLowerCase().includes(keyword.toLowerCase()));
-    // Check for common date formats: YYYY-MM-DD, YYYY/MM/DD, Month DD, YYYY, DD Month YYYY, etc.
+    // Check for common date formats: YYYY-MM-DD, YYYY/MM/DD, Month DD, YYYY, DD Month YYYY
+    // Year range check ensures we're looking at reasonable dates (20xx-21xx)
     const datePatterns = [
-      /\b\d{4}[-/]\d{1,2}[-/]\d{1,2}\b/,  // YYYY-MM-DD or YYYY/MM/DD
-      /\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{1,2},? \d{4}\b/i,  // Month DD, YYYY
-      /\b\d{1,2} (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{4}\b/i,  // DD Month YYYY
-      /\b\d{4}\b/  // Just a year (YYYY)
+      /\b(20\d{2}|21\d{2})[-/]\d{1,2}[-/]\d{1,2}\b/,  // YYYY-MM-DD or YYYY/MM/DD (2000-2199)
+      /\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{1,2},? (20\d{2}|21\d{2})\b/i,  // Month DD, YYYY
+      /\b\d{1,2} (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* (20\d{2}|21\d{2})\b/i  // DD Month YYYY
     ];
     const hasDateFormat = datePatterns.some(pattern => pattern.test(submittedText));
     
